@@ -34,6 +34,7 @@ public class Board {
                         int y = j + yOffset;
                             
                         if (!(xOffset == 0 && yOffset == 0) && (0 <= x && x < level.getRows()) && (0 <= y && y < level.getCols())) {
+                            cell.getNeighbours().add(cells[x][y]);
                             if (cells[x][y].hasBomb()) {
                                 cell.setBombsNearby(cell.getBombsNearby() + 1);
                             }
