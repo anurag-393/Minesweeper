@@ -31,12 +31,12 @@ public class Game {
 
     static {
         try {
-            FLAG_ICON = new  ImageIcon(new URL("https://www.google.com/logos/fnbx/minesweeper/flag_icon.png"));
+            FLAG_ICON = new  ImageIcon(new URL(Config.FLAG_ICON_URL));
             Image flagImg = FLAG_ICON.getImage();
             Image resizedFlagImage = flagImg.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             FLAG_ICON = new ImageIcon(resizedFlagImage);
             
-            BOMB_ICON = new  ImageIcon(new URL("https://w7.pngwing.com/pngs/220/369/png-transparent-minesweeper-pro-classic-mine-sweeper-minesweeper-plus-likeminesweeper-bomb-game-computer-wallpaper-video-game.png"));
+            BOMB_ICON = new  ImageIcon(new URL(Config.BOMB_ICON_URL));
             Image BombImg = BOMB_ICON.getImage();
             Image resizedBombImage = BombImg.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             BOMB_ICON = new ImageIcon(resizedBombImage);

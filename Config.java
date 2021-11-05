@@ -24,4 +24,7 @@ public class Config {
     
     public static final Color BOARD_DISABLED_DARK_COLOR = new Color(215, 184, 153);
     public static final Color BOARD_DISABLED_LIGHT_COLOR = new Color(229, 194, 159);
+
+    public static final String FLAG_ICON_URL = "https://www.google.com/logos/fnbx/minesweeper/flag_icon.png";
+    public static final String BOMB_ICON_URL = "https://apprecs.org/gp/images/app-icons/300/af/com.cgames.minesweeper.jpg";
 }
