@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ItemEvent;
@@ -14,6 +15,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -25,6 +27,10 @@ public class Game {
     Cell[][] cells;
     Level selectedLevel;
     JPanel boardPanel;
+    JLabel flagCount;
+    JPanel parentPanel;
+    int flagCounter;
+
     
     static ImageIcon FLAG_ICON;
     static ImageIcon BOMB_ICON;
@@ -46,18 +52,23 @@ public class Game {
         }
     }
 
-    // int x;
-    // int y;
+
     Game() {   
         frame  = new JFrame();
 
-        JPanel parentPanel = new JPanel();
+        parentPanel = new JPanel();
         JPanel gameDetailsPanel = new JPanel();
-
+        
         parentPanel.setLayout(new BorderLayout());
+        gameDetailsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 100, 0));
+        gameDetailsPanel.setBackground(Config.GAME_DETAILS_BG_COLOR);
+
+        
+        flagCount = new JLabel();
+        flagCount.setForeground(Config.GAME_DETAILS_FLAG_COUNT_COLOR);
+        flagCount.setFont(Config.FONT_FOR_BUTTONS);
 
         selectedLevel = null;
-        // String[] levels = {"Easy", "Medium", "Hard"}; 
         JComboBox<String> difficulty = new JComboBox<String>();
 
         for (Level level : Config.LEVELS) {
@@ -81,8 +92,15 @@ public class Game {
         });
         difficulty.getItemListeners()[0].itemStateChanged(null);
         
-        parentPanel.add(gameDetailsPanel, BorderLayout.NORTH);
+        flagCount.setVerticalAlignment(JLabel.CENTER);
+        flagCount.setHorizontalAlignment(JLabel.CENTER);
+
         gameDetailsPanel.add(difficulty);
+
+        gameDetailsPanel.add(flagCount);
+        
+        parentPanel.add(gameDetailsPanel, BorderLayout.NORTH);
+        
         frame.add(parentPanel);
         
         frame.setTitle("Minesweeper"); 
@@ -94,14 +112,16 @@ public class Game {
 
 
     JPanel initBoard(Level selectedLevel) {
+        
         Board board = new Board(selectedLevel);
-
-                // JComboBox<String> difficulty = new JComboBox<String>(levels);
 
         JPanel gamePanel = new JPanel();
         gamePanel.setLayout(new GridLayout(selectedLevel.getRows(), selectedLevel.getCols()));
 
         cells = board.getCells();
+        flagCounter = selectedLevel.getBombs();
+        flagCount.setText(String.valueOf(selectedLevel.getBombs()));
+        flagCount.setIcon(FLAG_ICON);
 
         buttons = new JButton[selectedLevel.getRows()][selectedLevel.getCols()];
         for (int i = 0; i < cells.length; i++) {
@@ -129,9 +149,11 @@ public class Game {
                                 button.setIcon(cell.isFlagged() ? FLAG_ICON : null);
                                 button.setText(null);
                                 if (cell.isFlagged()) {
-                                    // --
+                                    flagCounter--;
+                                    flagCount.setText(String.valueOf(flagCounter));
                                 } else {
-                                    // ++
+                                    flagCounter++;
+                                    flagCount.setText(String.valueOf(flagCounter));
                                 }
                             } else if (SwingUtilities.isLeftMouseButton(e)) {
                                 Stack<Cell> neighbourCells = new Stack<>();
@@ -162,7 +184,7 @@ public class Game {
                                     } else if (neighbourCell.getBombsNearby() > 0) {
                                         neighbourButton.setText(String.valueOf(neighbourCell.getBombsNearby()));
                                     } else {
-                                        neighbourButton.setText("0");
+                                        neighbourButton.setText(null);
 
                                         for (Cell nextCell : neighbourCell.getNeighbours()) {
                                             if (!nextCell.isRevealed()) {
@@ -184,6 +206,7 @@ public class Game {
                 });
 
                 buttons[i][j] = button;
+                buttons[i][j].setFont(Config.FONT_FOR_BUTTONS);
                 gamePanel.add(button);
             }
 
@@ -205,6 +228,14 @@ public class Game {
         System.out.println(unRevealedCellCount);
 
         if (unRevealedCellCount == selectedLevel.getBombs()) {
+            for (int i = 0; i < cells.length; i++) {
+                for (int j = 0; j < cells[i].length; j++) {
+                    if (!(cells[i][j].isRevealed())) {
+                        buttons[i][j].setIcon(BOMB_ICON);
+                        buttons[i][j].setDisabledIcon(BOMB_ICON);
+                    }
+                }
+            }
             return true;
         }
         else {
@@ -234,7 +265,7 @@ public class Game {
                      } else if(cell.getBombsNearby() > 0) {
                         buttons[i][j].setText(String.valueOf(cell.getBombsNearby()));
                     } else {
-                        buttons[i][j].setText("0"); 
+                        buttons[i][j].setText(null); 
                     }
                 }
             }
