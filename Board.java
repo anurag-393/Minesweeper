@@ -15,8 +15,6 @@ public class Board {
             }
         }
 
-        System.out.println(bombPositions);
-
         for(int i = 0; i < level.getRows(); i++){
             for (int j = 0; j < level.getCols(); j++) {
                 cells[i][j] = new Cell(new GridPosition(i, j), bombPositions.contains(new GridPosition(i, j)));

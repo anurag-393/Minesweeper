@@ -33,4 +33,5 @@ public class Config {
 
     public static final String FLAG_ICON_URL = "https://www.google.com/logos/fnbx/minesweeper/flag_icon.png";
     public static final String BOMB_ICON_URL = "https://apprecs.org/gp/images/app-icons/300/af/com.cgames.minesweeper.jpg";
+    public static final String TIMER_ICON_URL = "https://images.vexels.com/media/users/3/128840/isolated/preview/c091629800ce3d91d8527d32d60bc46f-stopwatch-timer.png";
 }

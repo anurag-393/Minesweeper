@@ -3,13 +3,17 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.plaf.metal.MetalButtonUI;
 
 public class Game {
@@ -30,10 +35,14 @@ public class Game {
     JLabel flagCount;
     JPanel parentPanel;
     int flagCounter;
+    JLabel timerLabel;
+    Timer timer;
+    Date startedTime;
 
     
     static ImageIcon FLAG_ICON;
     static ImageIcon BOMB_ICON;
+    static ImageIcon TIMER_ICON;
 
     static {
         try {
@@ -43,9 +52,14 @@ public class Game {
             FLAG_ICON = new ImageIcon(resizedFlagImage);
             
             BOMB_ICON = new  ImageIcon(new URL(Config.BOMB_ICON_URL));
-            Image BombImg = BOMB_ICON.getImage();
-            Image resizedBombImage = BombImg.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            Image bombImg = BOMB_ICON.getImage();
+            Image resizedBombImage = bombImg.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             BOMB_ICON = new ImageIcon(resizedBombImage);
+            
+            TIMER_ICON = new  ImageIcon(new URL(Config.TIMER_ICON_URL));
+            Image tiemrImg = TIMER_ICON.getImage();
+            Image resizedTimerImage = tiemrImg.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            TIMER_ICON = new ImageIcon(resizedTimerImage);
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -67,6 +81,23 @@ public class Game {
         flagCount = new JLabel();
         flagCount.setForeground(Config.GAME_DETAILS_FLAG_COUNT_COLOR);
         flagCount.setFont(Config.FONT_FOR_BUTTONS);
+        
+        timerLabel = new JLabel();
+        timerLabel.setForeground(Config.GAME_DETAILS_FLAG_COUNT_COLOR);
+        timerLabel.setFont(Config.FONT_FOR_BUTTONS);
+        // timerLabel.setIcon(TIMER_ICON);
+        timer = new Timer(500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (startedTime != null) {
+                    long diff = new Date().getTime() - startedTime.getTime();
+                    long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+                    long seconds = TimeUnit.MILLISECONDS.toSeconds(diff) % 60;
+                    timerLabel.setText(minutes + ":" + seconds);
+                }
+            }
+        });
+        timer.setRepeats(true);
 
         selectedLevel = null;
         JComboBox<String> difficulty = new JComboBox<String>();
@@ -84,6 +115,8 @@ public class Game {
                     if(boardPanel != null) {
                         parentPanel.remove(boardPanel);
                     }
+                    startedTime = null;
+                    timerLabel.setText(null);
                     boardPanel =  initBoard(selectedLevel);
                     parentPanel.add(boardPanel, BorderLayout.CENTER);
                     parentPanel.revalidate();
@@ -96,9 +129,10 @@ public class Game {
         flagCount.setHorizontalAlignment(JLabel.CENTER);
 
         gameDetailsPanel.add(difficulty);
-
         gameDetailsPanel.add(flagCount);
+        gameDetailsPanel.add(timerLabel);
         
+
         parentPanel.add(gameDetailsPanel, BorderLayout.NORTH);
         
         frame.add(parentPanel);
@@ -122,6 +156,7 @@ public class Game {
         flagCounter = selectedLevel.getBombs();
         flagCount.setText(String.valueOf(selectedLevel.getBombs()));
         flagCount.setIcon(FLAG_ICON);
+        timerLabel.setIcon(TIMER_ICON);
 
         buttons = new JButton[selectedLevel.getRows()][selectedLevel.getCols()];
         for (int i = 0; i < cells.length; i++) {
@@ -156,6 +191,11 @@ public class Game {
                                     flagCount.setText(String.valueOf(flagCounter));
                                 }
                             } else if (SwingUtilities.isLeftMouseButton(e)) {
+                                if(startedTime == null) {
+                                    startedTime = new Date();
+                                    timer.start();
+                                }
+
                                 Stack<Cell> neighbourCells = new Stack<>();
                                 Stack<JButton> neighbourButtons = new Stack<>();
 
@@ -189,9 +229,7 @@ public class Game {
                                         for (Cell nextCell : neighbourCell.getNeighbours()) {
                                             if (!nextCell.isRevealed()) {
                                                 neighbourCells.push(nextCell);
-                                                neighbourButtons
-                                                        .push(buttons[nextCell.getPosition().getGridx()][nextCell
-                                                                .getPosition().getGridy()]);
+                                                neighbourButtons.push(buttons[nextCell.getPosition().getGridx()][nextCell.getPosition().getGridy()]);
                                             }
                                         }
                                     }
@@ -244,6 +282,7 @@ public class Game {
     }
 
     void result (boolean result) {
+        timer.stop();
         if (result) {
             
             JOptionPane.showMessageDialog(frame, "You Won");
